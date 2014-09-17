@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Callbacks</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+</style>
+ <link rel="stylesheet" type="text/css" href="http://tutorial.sinch.com/index.css">
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-50667467-2', 'auto');
+          ga('send', 'pageview');
+        </script>     
+<style>
+body
+{
+font-site:14px
+}
+</style>
+</head>
+<body>
+<h1>Securing your Sinch Calling functionality app further with REST API</h1>
+
+<p>The Callback APIs are a really powerful way to get information about your calls, and further secure them. This is the final step before you allow the call to be connected. If you have followed our other tutorials, you are likely getting familiar with the different states of a call (progressing, established, and ended). With the callback API, you get the same events, enabling you to make decisions just before you connect the call to the server. </p>
+
+<p>For detailed information see the <a href="http://www.sinch.com/docs/rest-apis/api-documentation/#callback">documentation</a></p>
+
+<h2>Prerequisites</h2>
+
+<ol class="task-list">
+<li>Complete the following tutorial <a href="http://tutorial.sinch.com/net-backend-sample/">http://tutorial.sinch.com/net-backend-sample/</a>.</li>
+<li>Deploy the solution to a public accessible web server. This is needed because the Sinch backend needs to be able to post to your callback handler. </li>
+</ol><h2>Setup</h2>
+
+<ol class="task-list">
+<li>To receive callbacks, open your <a href="http://www.sinch.com/dashboard">dashboard</a> and add the URL that should get callbacks.
+<a href="images/Configure_callback.png" target="_blank"><img src="images/Configure_callback.png" style="max-width:100%;"></a>
+</li>
+<li>Add a new WebAPI controller and name it CallbackController to your backend project.</li>
+</ol><h2>Responding to callbacks</h2>
+
+<p>If you have configured your callback url, you <strong>must</strong> to respond to callbacks for the call to be connected. The Sinch service expects a response containing <strong>Svaml</strong> to make it a little bit easier to work with. In your C# project, create a couple of classes to help out:</p>
+
+<pre><code>public class Svaml {
+    public Instruction[] Instructions { get; set; }
+    public Action Action { get; set; }
+}
+public class Instruction {
+    public string Name { get; set; }
+    public string Ids { get; set; }
+    public string Locale { get; set; }
+}
+public class ICEAction:Action {
+    public string Number { get; set; }
+    public string locale { get; set; }
+    public int maxDuration { get; set; }
+    public bool callback { get; set; }
+    public string cli { get; set; }
+}
+public class SimpleICEAction : Action {
+    public int maxDuration { get; set; }
+    public bool callback { get; set; }
+}
+public class Action {
+    public string Name { get; set; }
+}
+</code></pre>
+
+<p>Svaml contains instructions and actions. For example, an instruction is if you want to play a sound file to a user, and an action is to connect to a call. For a complete list of instructions and actions, see the <a href="http://www.sinch.com/docs/rest-apis/api-documentation/#callback">documentation</a></p>
+
+<p>Next, create this method in your <strong>callbackcontroller</strong>:</p>
+
+<pre><code>[HttpPost]
+public async Task&lt;Svaml&gt; Post(HttpRequestMessage message) {
+}
+</code></pre>
+
+<p>This method is called for all callback events; they all look slightly different, but they all contain a JSON request an event.</p>
+
+<h3>Incoming call event (ICE)</h3>
+
+<p>This event is triggered right before you get the in progress event in a call client. I think this is the most interesting callback because you can change the call that is about to happen. Here, you can decide if a user has enough credit to make a call, or if the phone number is a phone number you want to connect to, and make decisions based on that. In case you are using Sinch to make click-to-call buttons, you may want to check the dialed phone number against a database. That's exactly what we are going to do in this tutorial. I don't want to connect any phone calls unless you are trying to call me. In the <strong>Post</strong> method add:</p>
+
+<pre><code>public async Task&lt;Svaml&gt; Post(HttpRequestMessage message) {
+    //read the response
+    String body = await message.Content.ReadAsStringAsync();
+    var json = JsonConvert.DeserializeObject&lt;JObject&gt;(body);
+    //create a new respone object
+    var svaml = new Svaml();
+    if (json["event"].ToString() == "ice") {
+        //only calls to my personal phone is allowed with this app
+        if (json["to"].ToString() == "+15612600684") {
+            svaml.Action = new SimpleICEAction() {
+                Name = "ConnectPSTN",
+                callback = true,
+                maxDuration = 600
+            };
+        } else {
+            //else hangup
+            svaml.Action = new Action {
+                Name = "hangup"
+            };
+        }
+    }
+}
+</code></pre>
+
+<h3>Answered call event (ACE)</h3>
+
+<p>Since you are using callbacks, you also need to take care of the ACE event, otherwise the call will not connect. In this case you are going to just let it continue. At the end of the <strong>post</strong> add:</p>
+
+<pre><code>if (json["event"].ToString() == "ace") {
+    svaml.Action = new Action() {
+    Name = "continue",
+   };
+}
+var svamljson = JsonConvert.SerializeObject(svaml, Formatting.Indented,
+    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+return svaml;
+</code></pre>
+
+<h3>Disconnected call event (DiCE)</h3>
+
+<p>This event is a notification event, where you could adjust the balance of your users' accounts, post duration to a CRM system, etc. No response at all is needed. </p>
+
+<p>You find the finished code fort this tutorial here: <a href="https://github.com/sinch/net-backend-sample">https://github.com/sinch/net-backend-sample</a></p>
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->
