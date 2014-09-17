@@ -63,6 +63,23 @@ kbd {
     line-height: 10px;
     padding: 1px 4px;
 }
+#sidebar {
+width: 200px;
+float: left;
+margin-top: 50px;
+border-right: 1px solid #636363;
+padding: 10px 25px 10px 25px;
+text-align: center;
+font-size: 16px;
+line-height: 22px;
+position: fixed;
+}
+#wrapper {
+width: 850px;
+float: right;
+font-size: 18px;
+line-height: 25px;
+}
 </style>
  <link rel="stylesheet" type="text/css" href="http://tutorial.sinch.com/index.css">
         <script>
@@ -82,6 +99,20 @@ font-site:14px
 </style>
 </head>
 <body>
+  <div id="sidebar">
+        <a href="http://www.sinch.com"><img id=logo src="http://tutorial.sinch.com/logo.png" /></a>
+
+        <div id="sinch-signup">
+            <div id="mailing-list-text">Would you like to hear<br /> about future tutorials?</div>
+            <a href="http://www.sinch.com/dashboard/#/signup" id="sinch-signup-button" >YES!</a>
+        </div>
+        <div id="tweet">
+            Questions?
+            <a href="https://twitter.com/intent/tweet?screen_name=SinchDev&text=I%20have%20a%20question%20about%20your%20Android%20messaging%20tutorial!" class="twitter-mention-button" data-related="SinchDev">Tweet to @SinchDev</a>
+            <script>!function (d, s, id) { var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https'; if (!d.getElementById(id)) { js = d.createElement(s); js.id = id; js.src = p + '://platform.twitter.com/widgets.js'; fjs.parentNode.insertBefore(js, fjs); } }(document, 'script', 'twitter-wjs');</script>
+        </div>
+    </div>
+<div id="wrapper">
 <h1>Securing your Sinch Calling functionality app further with REST API</h1>
 
 <p>The Callback APIs are a really powerful way to get information about your calls, and further secure them. This is the final step before you allow the call to be connected. If you have followed our other tutorials, you are likely getting familiar with the different states of a call (progressing, established, and ended). With the callback API, you get the same events, enabling you to make decisions just before you connect the call to the server. </p>
@@ -187,6 +218,7 @@ return svaml;
 <p>This event is a notification event, where you could adjust the balance of your users' accounts, post duration to a CRM system, etc. No response at all is needed. </p>
 
 <p>You find the finished code fort this tutorial here: <a href="https://github.com/sinch/net-backend-sample">https://github.com/sinch/net-backend-sample</a></p>
+</div>
 </body>
 </html>
 <!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->
