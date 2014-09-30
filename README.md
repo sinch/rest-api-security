@@ -10,7 +10,7 @@ For detailed information see the [documentation](http://www.sinch.com/docs/rest-
 
 ## Setup
 1. To receive callbacks, open your [dashboard](http://www.sinch.com/dashboard) and add the URL that should get callbacks.
-<img src="images/Configure_callback.png" style="width:200">
+<img src="Configure_callback.png" style="width:200">
 2. Add a new WebAPI controller and name it CallbackController to your backend project.
 
 ## Responding to callbacks
