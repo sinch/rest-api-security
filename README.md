@@ -5,7 +5,7 @@ The Callback APIs are a really powerful way to get information about your calls,
 For detailed information see the [documentation](http://www.sinch.com/docs/rest-apis/api-documentation/#callback)
 
 ## Prerequisites
-1. Complete the following tutorial [http://tutorial.sinch.com/net-backend-sample/](http://tutorial.sinch.com/net-backend-sample/).
+1. Complete the following tutorial [http://www.sinch.com/tutorials/using-delegated-security-application-server-using-c-sinch-sdk/](http://www.sinch.com/tutorials/using-delegated-security-application-server-using-c-sinch-sdk/).
 2. Deploy the solution to a public accessible web server. This is needed because the Sinch backend needs to be able to post to your callback handler. 
 
 ## Setup
